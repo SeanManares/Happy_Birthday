@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Aneng❤️</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, #12002b, #2b004f, #0a0014);
+      color: #fff;
+      text-align: center;
+      overflow-x: hidden;
+    }
+
+    #home {
+      background: linear-gradient(180deg, rgba(18, 0, 43, 0.7), rgba(43, 0, 79, 0.7), rgba(10, 0, 20, 0.7)), url('images/background.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      z-index: 10;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: #ffb6d9;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    section {
+      display: none;
+      padding: 70px 20px 100px;
+    }
+
+    section.active {
+      display: block;
+    }
+
+    /* Number Candles */
+    .numbers {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 40px;
+    }
+
+    .number {
+      font-size: 160px;
+      font-weight: bold;
+      position: relative;
+      color: #fff;
+    }
+
+    .flame {
+      width: 30px;
+      height: 50px;
+      background: radial-gradient(circle, #fff176 0%, #ff9800 60%, transparent 70%);
+      position: absolute;
+      top: -45px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      animation: flicker 0.15s infinite;
+    }
+
+    .off { display: none; }
+
+    @keyframes flicker {
+      0% { transform: translateX(-50%) scale(1); }
+      50% { transform: translateX(-50%) scale(0.9); }
+      100% { transform: translateX(-50%) scale(1); }
+    }
+
+    button.main {
+      margin-top: 25px;
+      padding: 14px 30px;
+      border: none;
+      border-radius: 30px;
+      background: #ff5fa2;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    /* Gallery */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .gallery img {
+      width: 100%;
+      border-radius: 14px;
+    }
+
+    video {
+      width: 100%;
+      max-width: 600px;
+      border-radius: 14px;
+    }
+
+    .letter {
+      max-width: 700px;
+      margin: auto;
+      background: rgba(255,255,255,0.1);
+      padding: 30px;
+      border-radius: 20px;
+      line-height: 1.7;
+      text-align: left;
+    }
+
+    /* Confetti */
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<audio id="bgMusic" src="music/music.mp3" loop></audio>
+
+<!-- HOME -->
+<section id="home" class="active">
+  <h1>Happy 18th Birthday!❤️😚😍</h1>
+  <p>heheheh blow your candle mahal ko</p>
+
+  <div class="numbers">
+    <div class="number">1<div class="flame" id="flame1"></div></div>
+    <div class="number">8<div class="flame" id="flame2"></div></div>
+  </div>
+
+  <button class="main" onclick="startMic()">Enable mic n blow💨</button>
+</section>
+
+<!-- PHOTOS -->
+<section id="photos">
+  <h2>Memories</h2>
+  <div class="gallery">
+    <img src="photos/photo1.jpg">
+    <img src="photos/photo2.jpg">
+    <img src="photos/photo3.jpg">
+  </div>
+</section>
+
+<!-- VIDEOS -->
+<section id="videos">
+  <h2>Mga Kalokohan Mo</h2>
+  <video controls>
+    <source src="videos/video1.mp4" type="video/mp4">
+  </video>
+</section>
+
+<!-- LETTER -->
+<section id="letter">
+  <h2>Wish and letter ko para sayo</h2>
+  <div class="letter">
+    <p>Hindii pa taposss mahal kooo</p>
+  </div>
+</section>
+
+<nav>
+  <button onclick="showPage('home')">Home</button>
+  <button onclick="showPage('photos')">Photos</button>
+  <button onclick="showPage('videos')">Videos</button>
+  <button onclick="showPage('letter')">Letter</button>
+</nav>
+
+<canvas id="confetti"></canvas>
+
+<script>
+  const music = document.getElementById('bgMusic');
+
+  function showPage(id) {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  async function startMic() {
+    music.volume = 0.5;  // Set volume to 50% (0.0 is mute, 1.0 is full)
+    music.play();
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const audioContext = new AudioContext();
+    const mic = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    mic.connect(analyser);
+    const data = new Uint8Array(analyser.frequencyBinCount);
+
+    function detectBlow() {
+      analyser.getByteFrequencyData(data);
+      const volume = data.reduce((a,b) => a + b) / data.length;
+      if (volume > 40) {
+        document.getElementById('flame1').classList.add('off');
+        document.getElementById('flame2').classList.add('off');
+        startConfetti();
+        alert('Happy 18th Birthday Aneng!!❤️❤️');
+        return;
+      }
+      requestAnimationFrame(detectBlow);
+    }
+    detectBlow();
+  }
+
+  function startConfetti() {
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const pieces = Array.from({length: 150}, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 6 + 4
+    }));
+
+    let confettiActive = true;  // Flag to control the animation
+
+    function draw() {
+      if (confettiActive) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(255,182,193,0.9)';
+        pieces.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+          p.y += 3;
+          if (p.y > canvas.height) p.y = 0;
+        });
+        requestAnimationFrame(draw);
+      }
+    }
+    draw();
+
+    // Stop the confetti after 5 seconds and clear the canvas
+    setTimeout(() => {
+      confettiActive = false;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }, 5000);
+  }
+</script>
+
+</body>
+</html>
